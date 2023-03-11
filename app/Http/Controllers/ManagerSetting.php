@@ -18,7 +18,7 @@ class ManagerSetting extends Controller
       $agencis = Agency::all();
       $visitcodes = VisitCode::all();
       $todayvisits = TodayVisit::select('date')->distinct()->get();
-      $agency_array = [];
+      $patient_array = [];
       foreach($agencis as $agency) {
         $patient_array[$agency->id] = $agency;
       }
