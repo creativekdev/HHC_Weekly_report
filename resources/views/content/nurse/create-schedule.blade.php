@@ -119,7 +119,10 @@
                                             style="background-color: #f1d4d4;"
                                         @endif
                                         >
-                                        <td>{{$patientName[$schedule->patient_id]}}</td>
+                                        <td>@if(array_key_exists($schedule->patient_id, $patientName))
+                                            {{$patientName[$schedule->patient_id]}}
+                                            @endif
+                                        </td>
                                         <td>
                                             @if($schedule->patient_id != $prev)
                                             <div class="mt-2 mb-3">
