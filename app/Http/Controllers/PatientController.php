@@ -41,7 +41,8 @@ class PatientController extends Controller
             'name'=>'required',
             'address'=>'required',
             'clinical_record'=>'required',
-            'agency_name'=>'required',
+            'agency_id'=>'required',
+
         ]);         
         Patient::create($param);
         session()->flash("success", "added successfully.");
@@ -85,14 +86,14 @@ class PatientController extends Controller
             'name'=>'required',
             'address'=>'required',
             'clinical_record'=>'required',
-            'agency_name'=>'required',
+            'agency_id'=>'required',            
         ]);         
         $stock = Patient::find($id);
         // Getting values from the blade template form
         $stock->name =  $request->get('name');
         $stock->address =  $request->get('address');
         $stock->clinical_record =  $request->get('clinical_record');
-        $stock->agency_name =  $request->get('agency_name');
+        $stock->agency_id =  $request->get('agency_id');
         $stock->save();
         session()->flash("success", "saved successfully.");
         return redirect()->back();

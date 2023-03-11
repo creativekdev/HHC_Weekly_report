@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('address');
             $table->string('clinical_record');
-            $table->string('agency_name');
+            $table->integer('agency_id');
             $table->timestamps();
         });
     }

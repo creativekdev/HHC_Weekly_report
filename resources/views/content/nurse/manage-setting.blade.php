@@ -42,7 +42,7 @@
                                 <td>{{$patient->name}}</td>
                                 <td>{{$patient->address}}</td>
                                 <td>{{$patient->clinical_record}}</td>
-                                <td>{{$patient->agency_name}}</td>
+                                <td>{{$patient_array[$patient->agency_id]->agency_name}}</td>
                                 <td style="text-align: right;">
                                     <div class="dropdown">
                                         <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="false"><i class="bx bx-dots-vertical-rounded"></i></button>
@@ -87,11 +87,11 @@
                                                     </div>                
                                                     <div class="row">
                                                         <div class="col mb-3">
-                                                            <label for="agency_name" class="form-label">Agency name</label>
+                                                            <label for="agency_id" class="form-label">Agency name</label>
 
-                                                            <select name="agency_name" class="form-select form-select-lg" required>
+                                                            <select name="agency_id" class="form-select form-select-lg" required>
                                                                 @foreach($agencis as $agency)
-                                                                <option value="{{$agency->agency_name}}">{{$agency->agency_name}}</option>
+                                                                <option value="{{$agency->id}}">{{$agency->agency_name}}</option>
                                                                 @endforeach
                                                             </select>                                                        </div>
                                                     </div>                                  
@@ -197,7 +197,7 @@
                                                 <div class="row">
                                                     <div class="col mb-3">
                                                         <label for="nameBasic" class="form-label">Agency Name</label>
-                                                        <input type="text" name="agency_name" class="form-control" placeholder="Enter Agency Name" value="{{$agency->agency_name}}" required>
+                                                        <input type="text" name="agency_id" class="form-control" placeholder="Enter Agency Name" value="{{$agency->agency_name}}" required>
                                                     </div>
                                                 </div>
                                                 <div class="row">
@@ -470,11 +470,11 @@
                     </div>                
                     <div class="row">
                         <div class="col mb-3">
-                            <label for="agency_name" class="form-label">Agency name</label>
+                            <label for="agency_id" class="form-label">Agency name</label>
 
-                            <select name="agency_name" class="form-select form-select-lg" required>
+                            <select name="agency_id" class="form-select form-select-lg" required>
                                 @foreach($agencis as $agency)
-                                <option value="{{$agency->agency_name}}">{{$agency->agency_name}}</option>
+                                <option value="{{$agency->id}}">{{$agency->agency_name}}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -515,7 +515,7 @@
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Agency Name</label>
-                            <input type="text" name="agency_name" class="form-control" placeholder="Enter Agency Name" required>
+                            <input type="text" name="agency_id" class="form-control" placeholder="Enter Agency Name" required>
                         </div>
                     </div>
                     <div class="row">

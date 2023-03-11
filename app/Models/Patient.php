@@ -20,7 +20,7 @@ class Patient extends Model
         'name',
         'address',
         'clinical_record',
-        'agency_name',
+        'agency_id',
         'created_at',
         'updated_at'
     ];        

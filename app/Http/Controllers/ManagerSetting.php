@@ -18,6 +18,10 @@ class ManagerSetting extends Controller
       $agencis = Agency::all();
       $visitcodes = VisitCode::all();
       $todayvisits = TodayVisit::select('date')->distinct()->get();
+      $agency_array = [];
+      foreach($agencis as $agency) {
+        $patient_array[$agency->id] = $agency;
+      }
       $weeks = [];
       foreach($todayvisits as $visit) {
         if(date('w', strtotime($visit->date)) == '6') {
@@ -29,8 +33,7 @@ class ManagerSetting extends Controller
         array_push($weeks, date("Y-m-d"));
       }
 
-
-      return view('content.nurse.manage-setting', compact('patients', 'agencis', 'visitcodes', 'weeks'));
+      return view('content.nurse.manage-setting', compact('patients', 'agencis', 'visitcodes', 'weeks', 'patient_array'));
     }
 
     // public function savePatient(Request $request) 

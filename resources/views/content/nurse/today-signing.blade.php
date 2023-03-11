@@ -9,7 +9,7 @@ Today patient signing visit interface
 
 <!-- Basic Bootstrap Table -->
 <div class="card">
-  <h5 class="card-header"></h5>
+  <h5 class="card-header">{{date("Y-m-d")}}</h5>
   <div class="table-responsive text-nowrap">
     <table class="table">
       <thead>
