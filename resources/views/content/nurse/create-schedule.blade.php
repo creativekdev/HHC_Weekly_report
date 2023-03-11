@@ -4,6 +4,23 @@
 
 @section('vendor-script')
 <script src="{{asset('assets/vendor/libs/masonry/masonry.js')}}"></script>
+<script type="text/javascript">
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        function save(){
+            $.ajax({
+                type:'POST',
+                url:"{{route('create-schedule.saveSchedule')}}",
+                data:{},
+                success:function(data){
+                    location.reload();
+                }
+            });
+        }
+    </script>
 @endsection
 
 @section('content')
@@ -12,27 +29,59 @@
 <!-- Examples -->
 <div class="row mb-5">
     <div class = "card">
-        <div class="mb-3 mt-3 row">
-            <div class="col-lg-4 col-md-6 row">
-                <label for="html5-time-input" class="col-md-7 col-form-label text-right" style="text-align:right;">Schedule start time today:</label>
-                <div class="col-md-5">
-                    <input class="form-control" type="time" value="12:30:00" id="html5-time-input" />
+        <form action="{{route('create-schedule.applySetting')}}" method="POST">
+            @csrf
+            <div class="mb-3 mt-3 row">
+                <div class="col-lg-4 col-md-6 row">
+                    <label for="html5-time-input" class="col-md-7 col-form-label text-right" style="text-align:right;">Schedule start time today:</label>
+                    <div class="col-md-5">
+                        <input class="form-control" name="start_time" type="time" value="{{$setting->start_time}}" id="html5-time-input" required/>
+                    </div>
                 </div>
-            </div>
-            <div class="col-lg-4 col-md-6 row">
-                <label for="html5-time-input" class="col-md-7 col-form-label" style="text-align:right;">Schedule end time today:</label>
-                <div class="col-md-5">
-                    <input class="form-control" type="time" value="12:30:00" id="html5-time-input" />
+                <div class="col-lg-4 col-md-6 row">
+                    <label for="html5-time-input" class="col-md-7 col-form-label" style="text-align:right;">Schedule end time today:</label>
+                    <div class="col-md-5">
+                        <input class="form-control" name = "end_time" type="time" value="{{$setting->end_time}}" id="html5-time-input" required/>
+                    </div>
                 </div>
-            </div>
-            <div class="col-lg-4 col-md-6 row">
-                <label for="html5-time-input" class="col-md-8 col-form-label" style="text-align:right;">Average travel time:</label>
-                <div class="col-md-4">
-                    <input type="number" class="form-control" id="defaultFormControlInput" placeholder="min" aria-describedby="defaultFormControlHelp">                
+                <div class="col-lg-4 col-md-6 row">
+                    <label for="html5-time-input" class="col-md-8 col-form-label" style="text-align:right;">Average travel time:</label>
+                    <div class="col-md-4">
+                        <input type="number" class="form-control" name="average_travel_time" placeholder="min" aria-describedby="defaultFormControlHelp" value="{{$setting->average_travel_time}}"required/>
+                    </div>
                 </div>
-            </div>
+                <div class="col-lg-6 col-md-6">
+                    @include('content.nurse.flash-message')  
+                </div>
+                <div class="col-lg-6 col-md-6 mt-3" style="text-align: right;">
+                    <button type="submit" class="btn btn-primary">Apply</button>
 
-        </div>
+                </div>
+                <div class="col-lg-12 col-md-12 mt-3">
+                    @if($box = Session::get('box'))
+                        <div class = "d-flex">
+                            <?php
+                                $cnt = count($box);
+                                $p = 100 / $cnt;
+                            ?>
+                            
+                            @foreach($box as $bx)
+                                @if($bx < 0)
+                                    <div style="width: {{$p}}%;    
+                                    background-color: grey; height: 20px;"></div>
+                                @elseif($bx == 0)
+                                    <div style="width: {{$p}}%;    
+                                        background-color: grey; height: 20px;"></div>
+                                @else
+                                    <div style="width: {{$p}}%;    
+                                        background-color: green; height: 20px;"></div>
+                                @endif
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </form>
     </div>    
 
     <div class = "card">
@@ -52,62 +101,122 @@
                             </tr>
                         </thead>
                         <tbody class="table-border-bottom-0">
-                            @for($i = 0; $i < 10; $i++) 
-                                <tr>
-                                    <td>Bert Smith</td>
-                                    <td>
-                                        <div class="mt-2 mb-3">
-                                            <select id="largeSelect" class="form-select form-select-lg">
-                                                <option value="1">1</option>
-                                                <option value="2">2</option>
-                                                <option value="3">3</option>
-                                            </select>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="mt-2 mb-3">
-                                            <select id="largeSelect" class="form-select form-select-lg">
-                                                <option value="1">S/U</option>
-                                                <option value="2">ADM</option>
-                                                <option value="3">HT-IV</option>
-                                            </select>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="mt-2 mb-3">
-                                            <select id="largeSelect" class="form-select form-select-lg">
-                                                <option value="1">15m</option>
-                                                <option value="2">20m</option>
-                                                <option value="3">1h</option>
-                                            </select>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group">
-                                            <div class="input-group-text">
-                                                <input class="form-check-input mt-0" type="checkbox" value="" aria-label="Checkbox for following text input">
+                            <?php
+                                $prev = "";
+                            ?>
+    
+                            @foreach($todaySchedule as $schedule)                                 
+                                <form action="{{route('create-schedule.updateSchedule')}}" method="POST">
+                                    <input type="hidden" name="id" value="{{$schedule->id}}">
+                                    <input type="hidden" name="date" value="{{$schedule->date}}">
+                                    <input type="hidden" name="patient_id" value="{{$schedule->patient_id}}">
+                                    <!-- <input type="hidden" name="issaved" value="{{$schedule->issaved}}"> -->
+                                    <input type="hidden" name="isrepeated" value="{{$schedule->isrepeated}}">
+
+                                    @csrf
+                                    <tr 
+                                        @if(!$schedule->issaved) 
+                                            style="background-color: #f1d4d4;"
+                                        @endif
+                                        >
+                                        <td>{{$patientName[$schedule->patient_id]}}</td>
+                                        <td>
+                                            @if($schedule->patient_id != $prev)
+                                            <div class="mt-2 mb-3">
+                                                <select name="visit_times" class="form-select form-select-lg" >
+                                                    @for($i = 1; $i <=3; $i++)
+                                                    <option value="{{$i}}" 
+                                                    <?php 
+                                                            if($schedule->visit_times == $i) echo "selected";
+                                                        ?>
+                                                        >{{$i}}</option>
+
+                                                    @endfor
+                                                </select>
                                             </div>
-                                            <input class="form-control" type="time" value="12:30:00" id="html5-time-input" />
-                                        </div>
-                                    </td>                                    
-                                    <td style="text-align: right;">
-                                        <div class="dropdown" >
-                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="false"><i class="bx bx-dots-vertical-rounded"></i></button>
-                                            <div class="dropdown-menu" >
-                                                <a class="dropdown-item" href="javascript:void(0);" ><i class="bx bx-edit-alt me-2"></i> Edit</a>
-                                                <a class="dropdown-item" href="javascript:void(0);" ><i class="bx bx-trash me-2"></i> Delete</a>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="mt-2 mb-3">
+                                                <select name="visit_code" class="form-select form-select-lg">
+                                                    @foreach($visitcodes as $visitcode)
+                                                        <option value="{{$visitcode->visit_code}}" 
+                                                        <?php 
+                                                            if($schedule->visit_code == $visitcode->visit_code) echo "selected";
+                                                        ?>
+                                                        >{{$visitcode->visit_code}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="mt-2 mb-3">
+                                                <select name="visit_interval" class="form-select form-select-lg"> 
+                                                    @for($i=15; $i <= 180; $i+=15)                                               
+                                                        <option value="{{$i}}"
+                                                        <?php 
+                                                            if($schedule->visit_interval == $i) echo "selected";
+                                                        ?>
+                                                        >{{$i}} mins</option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if($schedule->patient_id != $prev)
+                                            <div class="input-group">
+                                                <div class="input-group-text">
+                                                    <input class="form-check-input mt-0" name="isspecific_time" value="1" type="checkbox" <?php if($schedule->isspecific_time) echo "checked"?> aria-label="Checkbox for following text input">
+                                                </div>
+                                                <input class="form-control" name="specific_time" type="time" value="{{$schedule->specific_time}}" />
+                                            </div>
+                                            @endif
+                                        </td>
+                                        <td >
+                                            <button type="submit" class = "btn btn-primary">apply</button>
+                                            <button type="button" class = "btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteModal{{$schedule->id}}">delete</button>
+                                        </td>
+                                    </tr>
+                                    <?php
+                                        $prev = $schedule->patient_id;
+                                    ?>
+                                </form>
+
+                                <div class="modal fade" id="deleteModal{{$schedule->id}}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Delete Agency</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="{{route('create-schedule.destroySchedule')}}" method="POST">
+                                                    @csrf
+                                                    <!-- @method('DELETE') -->
+                                                    <input type="hidden" name="id" value="{{$schedule->id}}">
+                                                    <h2>Are you sure to delete?</h2>
+                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary">Delete</button>
+                                                </form>
+                                
+                                            </div>
+                                            <div class="modal-footer">
                                             </div>
                                         </div>
-                                    </td>
-                                </tr>
-                            @endfor                
+                                    </div>
+                                </div>            
+
+                            @endforeach
                         </tbody>
                     </table>
                 </div>      
-                <div class = "d-flex flex-row-reverse"> 
-                    <button type="button" class="btn btn-secondary">Save</button>
-                    <button type="button" class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#createModal">Add Patient</button>
-                </div>
+                <form action="{{route('create-schedule.saveSchedule')}}" method="POST">
+                    @csrf
+                    <div class = "d-flex flex-row-reverse">                     
+                        <button type="submit" class="btn btn-primary" >Save</button>
+                        <button type="button" class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#createModal">Add Patient</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>        
@@ -124,20 +233,37 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="row">
-                    <div class="col mb-3">
-                        <label for="nameBasic" class="form-label">Patient Name</label>
-                        <input type="text" id="agencyName" class="form-control" placeholder="Search and select Patient Name">
+                <form action="{{route('create-schedule.addPatient')}}" method="POST">
+                    @csrf
+                    <div class="row">
+                        <div class="col mb-3">
+                            <label for="nameBasic" class="form-label">Patient Name</label>
+
+                            <select name="id" class="select2 form-select">
+                                @foreach($patients as $patient)
+                                <option value="{{$patient->id}}">{{$patient->name}}</option>
+                                @endforeach
+                            </select>
+                            <!-- <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" value="" name="isrepeated">
+                                <label class="form-check-label" for="defaultCheck3">
+                                    Is repeat.
+                                </label>
+                            </div> -->
+                            <!-- <input type="text" id="agencyName" class="form-control" placeholder="Search and select Patient Name"> -->
+                        </div>
                     </div>
-                </div>
+                    <div style="text-align: right;">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Add</button>
             </div>
             </div>
         </div>
     </div>
-
+    
 <!--/ Card layout -->
 @endsection

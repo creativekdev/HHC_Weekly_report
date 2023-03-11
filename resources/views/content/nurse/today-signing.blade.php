@@ -17,13 +17,19 @@ Today patient signing visit interface
         </tr>
       </thead>
       <tbody class="table-border-bottom-0">
-        @for($i = 0; $i < 10; $i++) 
+        @foreach($todayVisits as $visit) 
             <tr>
-                <td>John Smith</td>
-                <td><a href = "/signaturepad" type="button" class="btn btn-primary" style="float:right;">Sign</a></td>
+                <td>
+                  <?php  if(array_key_exists($visit->patient_id, $patientName)) echo $patientName[$visit->patient_id] ?>
+                </td>
+                
+                @if($visit->is_signed)
+                  <td><a href = "{{route('getImage', ['id'=>$visit->id])}}" type="button" class="btn btn-secondary" style="float:right;">{{$visit->sign_time}} Signed</a></td> 
+                @else
+                  <td><a href = "{{route('signature-pad', ['id'=>$visit->id])}}" type="button" class="btn btn-primary" style="float:right;">Sign</a></td> 
+                @endif              
             </tr>
-        @endfor
-  
+        @endforeach
       </tbody>
     </table>
   </div>

@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PatientController;
+use App\Http\Controllers\AgencyController;
+use App\Http\Controllers\VisitCodeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,10 +21,31 @@ $controller_path = 'App\Http\Controllers';
 // Main Page Route
 Route::get('/', $controller_path . '\TodaySigning@index')->name('today-signing');
 Route::get('/manager-setting', $controller_path . '\ManagerSetting@index')->name('manager-setting');
-Route::get('/create-schedule', $controller_path . '\CreateSchedule@index')->name('create-schedule');
-Route::get('/signaturepad',$controller_path . '\SignaturePadController@index')->name('signature-pad');
+Route::get('/manager-setting/doc', $controller_path . '\ManagerSetting@getDoc')->name('getDoc');
+
+Route::get('/signaturepad/{id}',$controller_path . '\SignaturePadController@index')->name('signature-pad');
+Route::get('/signaturepad/getImage/{id}',$controller_path . '\SignaturePadController@getImage')->name('getImage');
+
 Route::post('/signaturepad',$controller_path . '\SignaturePadController@upload')->name('signature-upload');
-  
+
+
+Route::get('/create-schedule', $controller_path . '\CreateSchedule@index')->name('create-schedule');
+Route::post('/create-schedule/applySetting', $controller_path . '\CreateSchedule@applySetting')->name('create-schedule.applySetting');
+Route::post('/create-schedule/addPatient', $controller_path . '\CreateSchedule@addPatient')->name('create-schedule.addPatient');
+Route::post('/create-schedule/saveSchedule', $controller_path . '\CreateSchedule@saveSchedule')->name('create-schedule.saveSchedule');
+Route::post('/create-schedule/updateSchedule', $controller_path . '\CreateSchedule@updateSchedule')->name('create-schedule.updateSchedule');
+Route::post('/create-schedule/destroySchedule', $controller_path . '\CreateSchedule@destroySchedule')->name('create-schedule.destroySchedule');
+
+// Route::get('/today-signing/{visit_id}', $controller_path . '\TodaySigning@index')->name('today-signing');
+
+//ManagerSetting
+// Route::post('/manager-setting/save-patient', $controller_path . '\ManagerSetting@savePatient')->name('save-patient');
+Route::resource('patient', PatientController::class);
+Route::resource('agency', AgencyController::class);
+Route::resource('visitcode', VisitCodeController::class);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Route::get('/', $controller_path . '\dashboard\Analytics@index')->name('dashboard-analytics');
 
 // layout
@@ -84,3 +108,4 @@ Route::get('/form/layouts-horizontal', $controller_path . '\form_layouts\Horizon
 
 // tables
 Route::get('/tables/basic', $controller_path . '\tables\Basic@index')->name('tables-basic');
+ 

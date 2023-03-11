@@ -26,11 +26,12 @@
 <!-- Examples -->
 <div class="row mb-5">
     <form method="POST" action="{{ url('signaturepad') }}">
+        <input type="hidden" name = "id" value = "{{$visit->id}}" />
         @csrf
         <div class = "row">
             <div class="col-md-12 col-lg-12">
                 <label class="" for="">Name:</label>
-                <input type="text" name="name" class="form-group" value="David">
+                <input type="text" name="name" class="form-group" value=" <?php  if(array_key_exists($visit->patient_id, $patientName)) echo $patientName[$visit->patient_id] ?>" readonly>
             </div>                    
         </div>
         <div class="row" >
