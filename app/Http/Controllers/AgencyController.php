@@ -37,6 +37,7 @@ class AgencyController extends Controller
     {
         // echo json_encode($request);
         // die();
+
         $param = $request->except('_token');
         // Validation for required fields (and using some regex to validate our numeric value)
         $request->validate([

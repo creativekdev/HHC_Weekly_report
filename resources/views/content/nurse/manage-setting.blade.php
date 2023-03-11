@@ -197,7 +197,7 @@
                                                 <div class="row">
                                                     <div class="col mb-3">
                                                         <label for="nameBasic" class="form-label">Agency Name</label>
-                                                        <input type="text" name="agency_id" class="form-control" placeholder="Enter Agency Name" value="{{$agency->agency_name}}" required>
+                                                        <input type="text" name="agency_name" class="form-control" placeholder="Enter Agency Name" value="{{$agency->agency_name}}" required>
                                                     </div>
                                                 </div>
                                                 <div class="row">
@@ -515,7 +515,7 @@
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Agency Name</label>
-                            <input type="text" name="agency_id" class="form-control" placeholder="Enter Agency Name" required>
+                            <input type="text" name="agency_name" class="form-control" placeholder="Enter Agency Name" required>
                         </div>
                     </div>
                     <div class="row">
