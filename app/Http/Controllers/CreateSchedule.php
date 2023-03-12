@@ -97,71 +97,201 @@ class CreateSchedule extends Controller
       // }
       $setting = Setting::where('date', date("Y-m-d"))->first();
       if(is_null($setting)){
-        session()->flash("error", "Please apply setting for today.");  
+        session()->flash("error", "Please apply setting for today.");
         return redirect()->back();
       }
-      $schedules = TodaySchedule::where('date', date("Y-m-d"))->orderBy('visit_interval','DESC')->get();      
+      $schedules = TodaySchedule::where('date', date("Y-m-d"))->get();
       $start_time =  round(strtotime($setting->start_time) / 60);
       $end_time = round(strtotime($setting->end_time) / 60);
       $scheduleByID = [];
-      foreach($schedules as $schedule) {
-        $scheduleByID[$schedule->id] = $schedule;
+      for($k = 0; $k < count($schedules); $k++) {
+        $scheduleByID[$schedules[$k]->id] = $schedules[$k];
       }
+
       $box = [];
       $isok = true;
       for($time = $start_time - 10; $time <= $end_time + 10; $time +=1) $box[$time] = -1;
-      // $vst = [];
-      // foreach($schedules as $schedule) $vst[$schedule->id] = false;
-      foreach($schedules as $schedule) {
-        if($schedule->isspecific_time){
-          $vst[$schedule->id] = true;
-          $specific_time = round(strtotime($schedule->specific_time) / 60);
-          for($i = -10; $i < $schedule->visit_interval + 10; $i++) {
+      $vst = [];
+      for($k = 0; $k < count($schedules); $k++) 
+      {
+        $vst[$schedules[$k]->id] = false;
+      }
+      //////////////////specific time placement///////////////////////////////
+      $prev_patient_id = null;
+      for($k = 0; $k < count($schedules); $k++) {
+        if($vst[$schedules[$k]->id]) continue;
+        if($schedules[$k]->isspecific_time){
+          $specific_time = round(strtotime($schedules[$k]->specific_time) / 60);
+          $kk = $k;
+          $interval = 0;
+          for($kk = $k; $kk<count($schedules); $kk++) {
+            if($schedules[$kk]->patient_id != $schedules[$k]->patient_id) break;
+            $vst[$schedules[$kk]->id] = true;
+            $interval += $schedules[$kk]->visit_interval;
+          }
+          
+          for($i = -10; $i < $interval + 10; $i++) {
             $ii = $specific_time + $i;
             if(!array_key_exists($ii, $box)){
               $isok = false;
               break;
             }
             if($box[$ii] >= 0) $isok = false;
-            if($i>=0 && $i <$schedule->visit_interval ) $box[$ii] = $schedule->id;
+            if($i>=0 && $i < $interval )
+            {
+              $subinterval = 0;
+              for($selK = $k; $selK < count($schedules) && $subinterval + $schedules[$selK]->visit_interval  < $i; $selK++) $subinterval += $schedules[$selK]->visit_interval;
+              $box[$ii] = $schedules[$selK]->id;
+            }
             else  $box[$ii] = 0;
           }
         }
+
+        $prev_patient_id = $schedules[$k]->id;
+
       }
-      //placement
-      foreach($schedules as $schedule) {
-        if(!$schedule->isspecific_time){
+      //place several visit times
+      $prev_patient_id = null;
+      for($k = 0; $k < count($schedules); $k++) {
+        if($vst[$schedules[$k]->id]) continue;
+        if($schedules[$k]->visit_times > 1) {
+          $vst[$schedules[$k]->id] = true;
+
+          $interval = $schedules[$k]->visit_interval;
+  
           $findedPos = -1;
-          for($time = $start_time; $time <= $end_time; $time +=1){
+          for($time = $start_time; $time + 8*60 <= $end_time; $time +=1){
+
             if($box[$time] >= 0) continue;
+            // if(!array_key_exists($time - 8*60*60, $box)) continue;
+
+            if($box[$time +  8*60] >= 0) continue;
+                        
             $cnt = 0;
-            while($cnt < $schedule->visit_interval) {
+            while($cnt < $interval) {
               $ii = $time + $cnt;
-              if(!array_key_exists($ii, $box)){
-                break;
-              }  
+              $jj = $time + 8*60 + $cnt;
+              if(!array_key_exists($ii, $box)) break;
+              if(!array_key_exists($jj, $box)) break;
               if($box[$ii] >= 0) break;
+              if($box[$jj] >= 0) break;
+
               $cnt++;
             }
-            if($cnt >= $schedule->visit_interval){
+    
+            if($cnt >= $interval){
               $findedPos = $time;
               break;
             }
+
           };
           if($findedPos > 0) {
-            for($time = $findedPos - 10; $time<$findedPos + $schedule->visit_interval +10; $time++) {
-              if($time >=$findedPos && $time < $findedPos + $schedule->visit_interval) $box[$time] = $schedule->id;
-              else $box[$time] = 0;
-            }            
+  
+            // for($time = $findedPos - 10; $time<$findedPos + $schedule->visit_interval +10; $time++) {
+            //   if($time >=$findedPos && $time < $findedPos + $schedule->visit_interval) $box[$time] = $schedule->id;
+            //   else $box[$time] = 0;
+            // }
+            for($i = -10; $i < $interval + 10; $i++) {
+              $ii = $findedPos + $i;
+              $jj = $findedPos + $i +  8*60;
+              if(!array_key_exists($ii, $box)){
+                $isok = false;
+                break;
+              }
+              if(!array_key_exists($jj, $box)){
+                $isok = false;
+                break;
+              }
+  
+  
+              if($i>=0 && $i < $interval )
+              {
+                if($box[$ii] >= 0) $isok = false;
+                if($box[$jj] >= 0) $isok = false;
+                $box[$ii] = $schedules[$k]->id;
+                $box[$jj] = $schedules[$k]->id;
+              }
+              else  $box[$ii] = 0;
+            }
+            
           }
           else{
             $isok = false;
           }
         }
       }
+
+      //placement
+      for($k = 0; $k < count($schedules); $k++) {
+
+        if($vst[$schedules[$k]->id]) continue;
+        $interval = 0;
+        for($kk = $k; $kk < count($schedules); $kk++) {
+          if($schedules[$kk]->patient_id != $schedules[$k]->patient_id) break;
+          $vst[$schedules[$kk]->id] = true;
+          $interval += $schedules[$kk]->visit_interval;
+
+        }
+
+        $findedPos = -1;
+        for($time = $start_time; $time <= $end_time; $time +=1){
+          if($box[$time] >= 0) continue;
+                      
+          $cnt = 0;
+          while($cnt < $interval) {
+            $ii = $time + $cnt;
+            if(!array_key_exists($ii, $box)){
+              break;
+            }  
+            if($box[$ii] >= 0) break;
+            $cnt++;
+          }
+  
+          if($cnt >= $interval){
+            $findedPos = $time;
+            break;
+          }
+        };
+        if($findedPos > 0) {
+
+          // for($time = $findedPos - 10; $time<$findedPos + $schedule->visit_interval +10; $time++) {
+          //   if($time >=$findedPos && $time < $findedPos + $schedule->visit_interval) $box[$time] = $schedule->id;
+          //   else $box[$time] = 0;
+          // }
+          for($i = -10; $i < $interval + 10; $i++) {
+            $ii = $findedPos + $i;
+            if(!array_key_exists($ii, $box)){
+              $isok = false;
+              break;
+            }
+
+
+            if($i>=0 && $i < $interval )
+            {
+              if($box[$ii] >= 0)
+              {
+                $isok = false;
+              }              
+              $subinterval = 0;
+              for($selK = $k; $selK < count($schedules) && $subinterval + $schedules[$selK]->visit_interval  < $i; $selK++) $subinterval += $schedules[$selK]->visit_interval;
+              $box[$ii] = $schedules[$selK]->id;
+            }
+            else  $box[$ii] = 0;
+          }
+          
+        }
+        else{
+          $isok = false;
+        }
+      }
+      // echo json_encode($isok);
+      // die();
+
       $result_box = [];
       for($time = $start_time; $time <= $end_time; $time +=1) $result_box[$time] = $box[$time];
       // echo json_encode($box);
+      // die();
+      // echo json_encode($result_box);
       // die();
       if($isok){
         $today = date("Y-m-d");
@@ -201,7 +331,7 @@ class CreateSchedule extends Controller
           }
         }
 
-        session()->flash("success", "saved successfully.");
+        session()->flash("success", "Created Today Schedule successfully. Becarefull. This should be done before signing");
         return redirect()->back()->with('box', $result_box );
       }
       else{
