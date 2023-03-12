@@ -155,22 +155,23 @@ class CreateSchedule extends Controller
       for($k = 0; $k < count($schedules); $k++) {
         if($vst[$schedules[$k]->id]) continue;
         if($schedules[$k]->visit_times > 1) {
+          $delta = round(24 / $schedules[$k]->visit_times);
           $vst[$schedules[$k]->id] = true;
-
+          
           $interval = $schedules[$k]->visit_interval;
   
           $findedPos = -1;
-          for($time = $start_time; $time + 8*60 <= $end_time; $time +=1){
+          for($time = $start_time; $time + $delta*60 <= $end_time; $time +=1){
 
             if($box[$time] >= 0) continue;
             // if(!array_key_exists($time - 8*60*60, $box)) continue;
 
-            if($box[$time +  8*60] >= 0) continue;
+            if($box[$time +  $delta*60] >= 0) continue;
                         
             $cnt = 0;
             while($cnt < $interval) {
               $ii = $time + $cnt;
-              $jj = $time + 8*60 + $cnt;
+              $jj = $time + $delta*60 + $cnt;
               if(!array_key_exists($ii, $box)) break;
               if(!array_key_exists($jj, $box)) break;
               if($box[$ii] >= 0) break;
@@ -193,7 +194,7 @@ class CreateSchedule extends Controller
             // }
             for($i = -10; $i < $interval + 10; $i++) {
               $ii = $findedPos + $i;
-              $jj = $findedPos + $i +  8*60;
+              $jj = $findedPos + $i +  $delta*60;
               if(!array_key_exists($ii, $box)){
                 $isok = false;
                 break;
