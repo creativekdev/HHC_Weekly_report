@@ -40,7 +40,7 @@ class SignaturePadController extends Controller
     {
         $folderPath = public_path('upload/');
         
-        $image_parts = explode(";base64,", $request->signed);
+        $image_parts = explode(";base64,", $request->dataURL);
         
         $image_type_aux = explode("image/", $image_parts[0]);
         
