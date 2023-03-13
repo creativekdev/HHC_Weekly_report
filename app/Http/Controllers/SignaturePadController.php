@@ -23,7 +23,7 @@ class SignaturePadController extends Controller
         }
   
 
-        $visit = TodayVisit::find($id);
+        $visit = TodaySchedule::find($id);
         // $visit =
         return view('content.nurse.signature-pad', compact('visit', 'patientName'));
     }
@@ -31,7 +31,7 @@ class SignaturePadController extends Controller
     {
         // $visit_id = $request->visit_id;
 
-        $visit = TodayVisit::find($id);
+        $visit = TodaySchedule::find($id);
         return response()->file($visit->sign_url);
         // $visit =
     }
@@ -58,11 +58,12 @@ class SignaturePadController extends Controller
         // $save->name = $request->name;
         // $save->signature = $signature;
         // $save->save();
-        $visit = TodayVisit::find($request->id);
+        $visit = TodaySchedule::find($request->id);
         if($visit->is_signed) {
             unlink($visit->sign_url);
         }
-        TodayVisit::find($request->id)->update([
+        TodaySchedule::find($request->id)->update([
+            'issaved'=>'0', 
             'is_signed'=>'1', 
             'sign_time'=>date('Y-m-d H:i:s'), 
             'sign_url'=>$file

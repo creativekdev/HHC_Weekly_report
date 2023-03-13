@@ -21,6 +21,9 @@ return new class extends Migration
             $table->string('visit_code');
             $table->integer('visit_interval');
             $table->time('specific_time')->nullable();
+            $table->boolean("is_signed");
+            $table->time("sign_time")->nullable();
+            $table->string("sign_url")->nullable();
             $table->boolean('issaved');
             $table->boolean('isrepeated');
             $table->boolean('isspecific_time')->nullable();

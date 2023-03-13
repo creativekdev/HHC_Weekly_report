@@ -9,6 +9,8 @@ use App\Models\VisitCode;
 use App\Models\Setting;
 use App\Models\TodaySchedule;
 use App\Models\TodayVisit;
+use App\Http\Controllers\CreateSchedule;
+
 
 class TodaySigning extends Controller
 {
@@ -17,10 +19,36 @@ class TodaySigning extends Controller
       $patients = Patient::all();
       $agencis = Agency::all();
       $visitcodes = VisitCode::all();
-      $todaySchedule = TodaySchedule::where('date', date("Y-m-d"))->get();
+      // $todaySchedule = TodaySchedule::where('date', date("Y-m-d"))->get();
       $todayVisits = TodayVisit::where('date', date("Y-m-d"))->get();
       $patientName =  [];
       
+      $res  = (new CreateSchedule)->alignment();
+      $isok = $res['isok'];
+      $result_box = $res['result_box'];
+      // $box = [];
+      // for($time = $start_time - 10; $time <= $end_time + 10; $time +=1) $box[$time] = -1;
+      $setting = Setting::where('date', date("1994-4-12"))->first();
+
+      $start_time =  round(strtotime($setting->start_time) / 60);
+      $end_time = round(strtotime($setting->end_time) / 60);
+      $org_schedules = TodaySchedule::where('date', date("Y-m-d"))->get();
+      $scheduleByID = [];
+      for($k = 0; $k < count($org_schedules); $k++) {
+        $scheduleByID[$org_schedules[$k]->id] = $org_schedules[$k];
+      }
+      $todaySchedule = [];
+      for($time = $start_time; $time <= $end_time; ){
+        if($result_box[$time]>0) {
+          array_push($todaySchedule, $scheduleByID[$result_box[$time]]);
+          $cur = $result_box[$time];
+          while($time <= $end_time && $result_box[$time] == $cur) $time++;
+        }
+        else{
+          $time++;
+        }
+    }
+
       foreach($patients as $patient) {
         $patientName[$patient->id] = $patient->name;
       }

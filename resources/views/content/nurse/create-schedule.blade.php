@@ -20,6 +20,24 @@
                 }
             });
         }
+
+        function changeselect() {
+            var isrepeat = document.getElementById("is_repeat");
+            var selectpatient = document.getElementById("select_patient");
+            if(isrepeat.checked) {
+                @if(count($todaySchedule)>0)
+                last_patientid = {{$todaySchedule[count($todaySchedule) - 1]->patient_id}};
+                @endif
+                selectpatient.value = last_patientid;
+                // $('#select_patient').prop('disabled',true);
+                // $('#select_patient').val(last_patientid);
+                // document.getElementById("select").selectedIndex = 0;
+
+            }else {
+                // $('#select_patient').prop('disabled',false);
+                selectpatient.selectedIndex = 0;
+            }
+        }
     </script>
 @endsection
 
@@ -176,9 +194,8 @@
                                             @endif
                                         </td>
                                         <td >
-                                            <button type="submit" class = "btn btn-primary">apply</button>
-                                            <button type="button" class = "btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteModal{{$schedule->id}}">delete</button>
-                                        </td>
+                                            <button type="submit" class = "btn btn-primary">Apply</button>
+                                            <button type="button" class = "btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteModal{{$schedule->id}}">Delete</button>                                        </td>
                                     </tr>
                                     <?php
                                         $prev = $schedule->patient_id;
@@ -242,17 +259,17 @@
                         <div class="col mb-3">
                             <label for="nameBasic" class="form-label">Patient Name</label>
 
-                            <select name="id" class="select2 form-select">
+                            <select name="id" class="select2 form-select" id = "select_patient">
                                 @foreach($patients as $patient)
                                 <option value="{{$patient->id}}">{{$patient->name}}</option>
                                 @endforeach
                             </select>
-                            <!-- <div class="form-check mt-3">
-                                <input class="form-check-input" type="checkbox" value="" name="isrepeated">
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" value="" id = "is_repeat" onclick="changeselect()">
                                 <label class="form-check-label" for="defaultCheck3">
                                     Is repeat.
                                 </label>
-                            </div> -->
+                            </div>
                             <!-- <input type="text" id="agencyName" class="form-control" placeholder="Search and select Patient Name"> -->
                         </div>
                     </div>

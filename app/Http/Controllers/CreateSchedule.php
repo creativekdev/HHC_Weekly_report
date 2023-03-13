@@ -22,7 +22,7 @@ class CreateSchedule extends Controller
       $agencis = Agency::all();
       $visitcodes = VisitCode::all();
       $todaySchedule = TodaySchedule::where('date', date("Y-m-d"))->get();
-      $setting = Setting::where('date', date("Y-m-d"))->first();
+      $setting = Setting::where('date', date("1994-4-12"))->first();
       // echo json_encode($setting);
       // die();
       if(is_null($setting)) {
@@ -42,7 +42,7 @@ class CreateSchedule extends Controller
           'end_time'=>'required',
           'average_travel_time'=>'required'
       ]);
-      $setting = Setting::where('date', date("Y-m-d"))->first();
+      $setting = Setting::where('date', date("1994-4-12"))->first();
       // echo json_encode($setting);
       // return;
       if(isset($setting->id)) {
@@ -51,7 +51,7 @@ class CreateSchedule extends Controller
         $setting->average_travel_time = $param['average_travel_time'];
         $setting->save();
       } else {
-        $param['date'] = date("Y-m-d");
+        $param['date'] = date("1994-4-12");
         Setting::create($param);
       }
       
@@ -61,9 +61,12 @@ class CreateSchedule extends Controller
     }
 
     public function addPatient(Request $request) {
+      // echo json_encode($request->id);
+
+      // die();
       $request->validate([
         'id'=>'required'
-      ]);
+      ]); 
       $param = $request->except('_token');
       // Validation for required fields (and using some regex to validate our numeric value)
       // $patient = Patient::find('id');
@@ -76,6 +79,7 @@ class CreateSchedule extends Controller
         "visit_code"=>"", 
         "visit_interval"=>15,
         "specific_time"=>"06:30", 
+        "is_signed"=>"0",
         "issaved"=>"0", 
         "isrepeated"=>"0", 
         "isspecific_time"=>false
@@ -83,23 +87,29 @@ class CreateSchedule extends Controller
       // echo json_encode($setting);
       // return;
       TodaySchedule::create($patientForSchedule);
-      return redirect()->back();
+
+      $res  = $this->alignment();
+      $isok = $res['isok'];
+      $result_box = $res['result_box'];
+
+      if($isok){
+        session()->flash("success", "Added Success fully");
+        return redirect()->back()->with('box', $result_box );
+      }
+      else{
+        session()->flash("error", "Can not Schedule! Please control params.");  
+        return redirect()->back();
+      }
+
+      // return redirect()->back();
     }
-    public function saveSchedule(Request $request) {
-      
-      // $interval = $setting->end_time - $setting->start_time;
-      
-      // $isfirst = true;
-      // foreach($schedules as $schedule) {
-      //   $sum_interval += $schedule->visit_interval;
-      //   (!$isfirst) $sum_interval += $setting->
-      //   $isfirst = false;
-      // }
-      $setting = Setting::where('date', date("Y-m-d"))->first();
+
+    public function alignment() {
+      $setting = Setting::where('date', date("1994-4-12"))->first();
       if(is_null($setting)){
         session()->flash("error", "Please apply setting for today.");
         return redirect()->back();
-      }
+      }      
       $schedules = TodaySchedule::where('date', date("Y-m-d"))->get();
       $start_time =  round(strtotime($setting->start_time) / 60);
       $end_time = round(strtotime($setting->end_time) / 60);
@@ -290,29 +300,48 @@ class CreateSchedule extends Controller
 
       $result_box = [];
       for($time = $start_time; $time <= $end_time; $time +=1) $result_box[$time] = $box[$time];
-      // echo json_encode($box);
-      // die();
-      // echo json_encode($result_box);
-      // die();
+
+      return ['isok'=>$isok, 'result_box'=>$result_box];
+    }
+
+    public function saveSchedule(Request $request) {
+
+      $res  = $this->alignment();
+      $isok = $res['isok'];
+      $result_box = $res['result_box'];
+      // $box = [];
+      // for($time = $start_time - 10; $time <= $end_time + 10; $time +=1) $box[$time] = -1;
+      $setting = Setting::where('date', date("1994-4-12"))->first();
+
+      $start_time =  round(strtotime($setting->start_time) / 60);
+      $end_time = round(strtotime($setting->end_time) / 60);
+      $schedules = TodaySchedule::where('date', date("Y-m-d"))->get();
+      $scheduleByID = [];
+      for($k = 0; $k < count($schedules); $k++) {
+        $scheduleByID[$schedules[$k]->id] = $schedules[$k];
+      }
+
+
+
       if($isok){
         $today = date("Y-m-d");
         $setting = TodaySchedule::where('date', $today)->update(['issaved'=>"1"]);
 
-        $visits = TodayVisit::where('date', $today)->get();
+        // $visits = TodayVisit::where('date', $today)->get();
 
-        foreach($visits as $visit)
-        {
-          if($visit->is_signed) {
-            unlink($visit->sign_url);
-          }
-        }
+        // foreach($visits as $visit)
+        // {
+        //   if($visit->is_signed) {
+        //     unlink($visit->sign_url);
+        //   }
+        // }
         TodayVisit::where('date', $today)->delete();
 
 
         $isfirst = true;      
         for($time = $start_time; $time <= $end_time; ){
-          if($box[$time]>0) {
-            $schedule = $scheduleByID[$box[$time]];
+          if($result_box[$time]>0) {
+            $schedule = $scheduleByID[$result_box[$time]];
             // echo json_encode($schedule->patient_id);
             // die();
 
@@ -321,18 +350,20 @@ class CreateSchedule extends Controller
               'patient_id'=>$schedule->patient_id, 
               'schedule_id'=>$schedule->id, 
               'visit_code'=>$schedule->visit_code,
-              'visit_interval'=>$schedule->visit_interval,      
-              'is_signed'=>'0'
+              'visit_interval'=>$schedule->visit_interval,               
+              'is_signed'=>$schedule->is_signed,
+              'sign_time'=>$schedule->sign_time,
+              'sign_url'=>$schedule->sign_url
             ]);
-            $cur = $box[$time];
-            while($time <= $end_time && $box[$time] == $cur) $time++;
+            $cur = $result_box[$time];
+            while($time <= $end_time && $result_box[$time] == $cur) $time++;
           }
           else{
             $time++;
           }
         }
 
-        session()->flash("success", "Created Today Schedule successfully. Becarefull. This should be done before signing");
+        session()->flash("success", "Saved Success fully");
         return redirect()->back()->with('box', $result_box );
       }
       else{
@@ -360,15 +391,45 @@ class CreateSchedule extends Controller
       if(is_null($stock->isspecific_time)) $stock->isspecific_time = "0";
 
       $stock->save();
-      session()->flash("success", "appied successfully.");
-      return redirect()->back();
+
+      $res  = $this->alignment();
+      $isok = $res['isok'];
+      $result_box = $res['result_box'];
+
+      if($isok){
+        $today = date("Y-m-d");
+        // $setting = TodaySchedule::where('date', $today)->update(['issaved'=>"1"]);
+
+        session()->flash("success", "appied successfully.");
+        return redirect()->back()->with('box', $result_box );
+      }
+      else{
+        session()->flash("error", "Can not Schedule! Please control params.");  
+        return redirect()->back();
+      }
+
     }
 
     public function destroySchedule(Request $request)
     {
         $patient = TodaySchedule::find($request->id);
         $patient->delete();
-        session()->flash("success", "deleted successfully.");
+        // session()->flash("success", "deleted successfully.");
+
+        $res  = $this->alignment();
+        $isok = $res['isok'];
+        $result_box = $res['result_box'];
+  
+        if($isok){
+          session()->flash("success", "Deleted Successfully");
+          return redirect()->back()->with('box', $result_box );
+        }
+        else{
+          session()->flash("error", "Can not Schedule! Please control params.");  
+          return redirect()->back();
+        }
+  
+
         return redirect()->back();
     }
 
