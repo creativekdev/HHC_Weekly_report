@@ -372,7 +372,7 @@
                 <form action="{{route('getDoc')}}" method="GET">                
                     <div class="row">
                         <div class = "col-lg-10"><span>Last week(all Patients)</span></div>
-                        <div class = "col-lg-2">
+                        <div class = "col-lg-2" style="margin-bottom: 0px; margin-top: auto;">
                             <button type="submit" class="btn btn-primary">Export</button>
                         </div>                    
                     </div>
@@ -387,7 +387,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class = "col-lg-2 col-md-2">
+                        <div class = "col-lg-2 col-md-2" style="margin-bottom: 0px; margin-top: auto;">
                             <button type="submit" class="btn btn-primary">Export</button>
                         </div>                    
                     </div>
@@ -402,8 +402,8 @@
                                 @endforeach
                             </select>                        
                         </div>
-                        <div class = "col-lg-2 col-md-2">
-                            <button type="submit" class="btn btn-primary">Export</button>
+                        <div class = "col-lg-2 col-md-2" style="margin-bottom: 0px; margin-top: auto;">
+                            <button type="submit" class="btn btn-primary" >Export</button>
                         </div>                    
                     </div>                
                 </form>
@@ -425,7 +425,7 @@
                                 @endforeach
                             </select>                        
                         </div>
-                        <div class = "col-lg-2 col-md-2">
+                        <div class = "col-lg-2 col-md-2" style="margin-bottom: 0px; margin-top: auto;">
                             <button type="submit" class="btn btn-primary">Export</button>
                         </div>                    
                     </div>                

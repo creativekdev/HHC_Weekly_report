@@ -25,12 +25,12 @@ class ManagerSetting extends Controller
       $weeks = [];
       foreach($todayvisits as $visit) {
         if(date('w', strtotime($visit->date)) == '6') {
-          array_push($weeks, $visit->date);
+          array_push($weeks, date('m/d/Y',strtotime($visit->date)));
         }
       }
 
       if(date('w') != '6') {
-        array_push($weeks, date("Y-m-d"));
+        array_push($weeks, date("m/d/Y"));
       }
 
       return view('content.nurse.manage-setting', compact('patients', 'agencis', 'visitcodes', 'weeks', 'patient_array'));
@@ -78,7 +78,7 @@ class ManagerSetting extends Controller
         if(!$visit->is_signed) continue;
         // echo json_encode($patient_array[$patient->id]);
         // die();
-  
+        $visit->day = date('l',strtotime($visit->date));
         $visit->date = date('n/d',strtotime($visit->date));
         $visit->time_in = date('g:i a',strtotime($visit->sign_time) - $visit->visit_interval * 60);
         $visit->time_out = date('g:i a',strtotime($visit->sign_time));
