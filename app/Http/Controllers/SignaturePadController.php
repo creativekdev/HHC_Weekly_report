@@ -31,11 +31,18 @@ class SignaturePadController extends Controller
     {
         // $visit_id = $request->visit_id;
 
+        $visit = TodayVisit::find($id);
+        return response()->file($visit->sign_url);
+        // $visit =
+    }
+    public function getImageBySchedule($id)
+    {
+        // $visit_id = $request->visit_id;
+
         $visit = TodaySchedule::find($id);
         return response()->file($visit->sign_url);
         // $visit =
     }
-
     public function upload(Request $request)
     {
         $folderPath = public_path('upload/');

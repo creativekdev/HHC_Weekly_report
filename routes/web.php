@@ -25,6 +25,7 @@ Route::get('/manager-setting/doc', $controller_path . '\ManagerSetting@getDoc')-
 
 Route::get('/signaturepad/{id}',$controller_path . '\SignaturePadController@index')->name('signature-pad');
 Route::get('/signaturepad/getImage/{id}',$controller_path . '\SignaturePadController@getImage')->name('getImage');
+Route::get('/signaturepad/getImageBySchedule/{id}',$controller_path . '\SignaturePadController@getImageBySchedule')->name('getImageBySchedule');
 
 Route::post('/signaturepad',$controller_path . '\SignaturePadController@upload')->name('signature-upload');
 // Route::post('/create-schedule/saveSchedule', $controller_path . '\CreateSchedule@saveSchedule')->name('create-schedule.saveSchedule');

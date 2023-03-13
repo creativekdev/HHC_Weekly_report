@@ -24,7 +24,7 @@ Today patient signing visit interface
                 </td>
                 
                 @if($visit->is_signed)
-                  <td><a href = "{{route('getImage', ['id'=>$visit->id])}}" type="button" class="btn btn-secondary" style="float:right;">{{$visit->sign_time}} Signed</a></td> 
+                  <td><a href = "{{route('getImageBySchedule', ['id'=>$visit->id])}}" type="button" class="btn btn-secondary" style="float:right;">{{$visit->sign_time}} Signed</a></td> 
                 @else
                   <td><a href = "{{route('signature-pad', ['id'=>$visit->id])}}" type="button" class="btn btn-primary" style="float:right;">Sign</a></td> 
                 @endif              
