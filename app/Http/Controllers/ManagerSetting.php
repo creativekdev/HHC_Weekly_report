@@ -78,7 +78,7 @@ class ManagerSetting extends Controller
         if(!$visit->is_signed) continue;
         // echo json_encode($patient_array[$patient->id]);
         // die();
-        $visit->day = date('l',strtotime($visit->date));
+        $visit->day = strtoupper(substr(date('l',strtotime($visit->date))."",0, 3));
         $visit->date = date('n/d',strtotime($visit->date));
         $visit->time_in = date('g:i a',strtotime($visit->sign_time) - $visit->visit_interval * 60);
         $visit->time_out = date('g:i a',strtotime($visit->sign_time));
