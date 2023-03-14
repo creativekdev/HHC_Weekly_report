@@ -171,7 +171,7 @@ TIME<o:p></o:p></span></h2>
   mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt;height:26.45pt'>
   <p class=MsoNormal align=center style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
   auto;text-align:center'><span style='mso-fareast-font-family:"Times New Roman";
-  mso-no-proof:yes'><img width=50 height=20 id="_x0000_i1029"
+  mso-no-proof:yes'><img width=100 height=30 id="_x0000_i1029"
   src="{{route('getImage', ['id'=>$visit->id])}}"
   alt="{{route('getImage', ['id'=>$visit->id])}}"></span><span
   style='mso-fareast-font-family:"Times New Roman"'><o:p></o:p></span></p>
