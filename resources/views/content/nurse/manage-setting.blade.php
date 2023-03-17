@@ -168,6 +168,7 @@
                         @endif
                         @foreach($agencis as $agency) 
                             <tr>
+                                <td><img src="{{ asset('images/'.$agency->avatar) }}" style="width: 50px; visibility: visible; border-radius: 50%;"></td>
                                 <td>{{$agency->agency_name}}</td>
                                 <td>{{$agency->employee_id}}</td>
                                 <td style="text-align: right;">
@@ -191,7 +192,7 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <form action="{{route('agency.update', $agency->id)}}" method="POST">
+                                            <form action="{{route('agency.update', $agency->id)}}" method="POST" enctype="multipart/form-data">
                                                 @method('PATCH')                                                 
                                                 @csrf
                                                 <div class="row">
@@ -206,6 +207,12 @@
                                                         <input type="text" name="employee_id" class="form-control" placeholder="Enter employID" value="{{$agency->employee_id}}" required>
                                                     </div>
                                                 </div> 
+                                                <div class="row">
+                                                    <div class="col mb-3">
+                                                        <input type="file" class="form-control" name="avatar" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
+                                                    </div>                            
+                                                </div>
+
                                                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
                                                 <button type="submit" class="btn btn-primary">Save changes</button>
 
@@ -510,7 +517,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form action="{{route('agency.store')}}" method="POST">
+                <form action="{{route('agency.store')}}" method="POST" enctype="multipart/form-data" >
                     @csrf
                     <div class="row">
                         <div class="col mb-3">
@@ -524,6 +531,12 @@
                             <input type="text" name="employee_id" class="form-control" placeholder="Enter employID" required>
                         </div>
                     </div> 
+                    <div class="row">
+                        <div class="col mb-3">
+                            <input type="file" class="form-control" name="avatar" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
+                        </div>                            
+                    </div>
+
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Save changes</button>
                 </form>   

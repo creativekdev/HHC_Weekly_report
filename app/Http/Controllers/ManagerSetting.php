@@ -65,11 +65,17 @@ class ManagerSetting extends Controller
       
       $todayvisits = TodayVisit::all();
       $patients = Patient::all();
+      $agencis = Agency::all();
       $patient_array = [];
+      $agency_array =[];
+      $one_patient = null;
       foreach($patients as $patient) {
+        if(is_null($one_patient)) $one_patient =$patient;
+
         $patient_array[$patient->id] = $patient;
         // array_push($patient_array, [$patient->id => $patient]);
       }
+
       $data = [];
       foreach($todayvisits as $visit) {
         if(!is_null($patient_id) && $patient_id != $visit->patient_id ) continue;
@@ -84,8 +90,15 @@ class ManagerSetting extends Controller
         $visit->time_out = date('g:i a',strtotime($visit->sign_time));
         array_push($data, $visit);
       }
+      $selected_agency =  null;
+      foreach($agencis as $agency) {
 
-      $view = View::make('content.nurse.report',['visits'=>$data, 'patient_array'=>$patient_array])->render();
+        if($one_patient->agency_id == $agency->id) $selected_agency = $agency;
+
+        // array_push($patient_array, [$patient->id => $patient]);
+      }
+
+      $view = View::make('content.nurse.report',['visits'=>$data, 'patient_array'=>$patient_array, 'agency'=>$selected_agency] )->render();
       // $file_name = strtotime(date('Y-m-d H:i:s')) . '_advertisement_template.docx';
       $headers = array(
           "Content-type"=>"text/html",

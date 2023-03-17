@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('agency', function (Blueprint $table) {
             $table->id();
             $table->string('agency_name');
+            $table->string('avatar')->nullable();
             $table->string('employee_id');
             $table->timestamps();
         });

@@ -35,15 +35,25 @@ class AgencyController extends Controller
      */
     public function store(Request $request)
     {
-        // echo json_encode($request);
-        // die();
-
         $param = $request->except('_token');
         // Validation for required fields (and using some regex to validate our numeric value)
         $request->validate([
             'agency_name'=>'required',
-            'employee_id'=>'required'
-        ]);         
+            'employee_id'=>'required',
+            // 'avatar' => 'required|image|mimes:png,jpg,jpeg|max:2048'
+        ]);
+        
+        // echo json_encode($request->avatar->getClientOriginalName());
+        // die();
+        if(!is_null($request->avatar)){
+            $imageName = time().'.'.$request->avatar->extension();    
+            // var_dump($imageName);
+            $request->avatar->move(public_path('images'), $imageName);
+            $param['avatar']  = $imageName;
+            // var_dump($param);
+            // die();
+                
+        }
         Agency::create($param);
         session()->flash("success", "added successfully.");
         return redirect()->back();
@@ -82,14 +92,22 @@ class AgencyController extends Controller
     {
         $request->validate([
             'agency_name'=>'required',
-            'employee_id'=>'required'
+            'employee_id'=>'required'        
         ]);         
         $stock = Agency::find($id);
         // Getting values from the blade template form
         $stock->agency_name =  $request->get('agency_name');
         $stock->employee_id =  $request->get('employee_id');
+        if(!is_null($request->avatar)){
+            if($stock->avatar != null) {
+                unlink(public_path('images').'/'.$stock->avatar);
+            }
+            $imageName = time().'.'.$request->avatar->extension();
+            $request->avatar->move(public_path('images'), $imageName);
+            $stock->avatar  = $imageName;
+        }
         $stock->save();
-        session()->flash("success", "saved successfully.");
+        session()->flash("success", "updated successfully.");
         return redirect()->back();
     }
 
