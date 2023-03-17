@@ -10,6 +10,11 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
+        jQuery(function ($) {        
+            $('form').bind('submit', function () {
+                $(this).find(':input').prop('disabled', false);
+            });
+        });        
         function save(){
             $.ajax({
                 type:'POST',
@@ -29,12 +34,14 @@
                 last_patientid = {{$todaySchedule[count($todaySchedule) - 1]->patient_id}};
                 @endif
                 selectpatient.value = last_patientid;
-                // $('#select_patient').prop('disabled',true);
+                // selectpatient.style.visibility = 'hidden';
+                $('#select_patient').prop('disabled','true');
                 // $('#select_patient').val(last_patientid);
                 // document.getElementById("select").selectedIndex = 0;
 
             }else {
-                // $('#select_patient').prop('disabled',false);
+                $('#select_patient').prop('disabled','false');
+                // selectpatient.style.visibility = 'visible';                
                 selectpatient.selectedIndex = 0;
             }
         }
@@ -65,15 +72,16 @@
                 <div class="col-lg-4 col-md-6 row">
                     <label for="html5-time-input" class="col-md-8 col-form-label" style="text-align:right;">Average travel time:</label>
                     <div class="col-md-4">
-                        <input type="number" class="form-control" name="average_travel_time" placeholder="min" aria-describedby="defaultFormControlHelp" value="{{$setting->average_travel_time}}"required/>
+                        <input type="number" class="form-control" name="average_travel_time" min="10" max="1440" placeholder="min" aria-describedby="defaultFormControlHelp" value="{{$setting->average_travel_time}}"required/>
                     </div>
+
+                    
                 </div>
                 <div class="col-lg-6 col-md-6">
                     @include('content.nurse.flash-message')  
                 </div>
                 <div class="col-lg-6 col-md-6 mt-3" style="text-align: right;">
                     <button type="submit" class="btn btn-primary">Apply</button>
-
                 </div>
                 <div class="col-lg-12 col-md-12 mt-3">
                     @if($box = Session::get('box'))
@@ -261,15 +269,17 @@
 
                             <select name="id" class="select2 form-select" id = "select_patient">
                                 @foreach($patients as $patient)
-                                <option value="{{$patient->id}}">{{$patient->name}}</option>
+                                    <option value="{{$patient->id}}">{{$patient->name}}</option>
                                 @endforeach
                             </select>
-                            <div class="form-check mt-3">
-                                <input class="form-check-input" type="checkbox" value="" id = "is_repeat" onclick="changeselect()">
-                                <label class="form-check-label" for="defaultCheck3">
-                                    Is repeat.
-                                </label>
-                            </div>
+                            @if(count($todaySchedule)>0)
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="checkbox" value="" id = "is_repeat" onclick="changeselect()">
+                                    <label class="form-check-label" for="defaultCheck3">
+                                        Is repeat.
+                                    </label>
+                                </div>
+                            @endif
                             <!-- <input type="text" id="agencyName" class="form-control" placeholder="Search and select Patient Name"> -->
                         </div>
                     </div>

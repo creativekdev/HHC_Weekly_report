@@ -55,9 +55,19 @@ class CreateSchedule extends Controller
         Setting::create($param);
       }
       
+      $res  = $this->alignment();
+      $isok = $res['isok'];
+      $result_box = $res['result_box'];
+
+      if($isok){
+        session()->flash("success", "applied successfully.");
+        return redirect()->back()->with('box', $result_box );
+      }
+      else{
+        session()->flash("error", "Applied successfully.But can not Schedule! Please control params.");  
+        return redirect()->back();
+      }
       
-      session()->flash("success", "applied successfully.");
-      return redirect()->back();
     }
 
     public function addPatient(Request $request) {
@@ -113,6 +123,7 @@ class CreateSchedule extends Controller
       $schedules = TodaySchedule::where('date', date("Y-m-d"))->get();
       $start_time =  round(strtotime($setting->start_time) / 60);
       $end_time = round(strtotime($setting->end_time) / 60);
+      $average_travel_time = $setting->average_travel_time;
       $scheduleByID = [];
       for($k = 0; $k < count($schedules); $k++) {
         $scheduleByID[$schedules[$k]->id] = $schedules[$k];
@@ -120,7 +131,7 @@ class CreateSchedule extends Controller
 
       $box = [];
       $isok = true;
-      for($time = $start_time - 10; $time <= $end_time + 10; $time +=1) $box[$time] = -1;
+      for($time = $start_time - $average_travel_time; $time <= $end_time + $average_travel_time; $time +=1) $box[$time] = -1;
       $vst = [];
       for($k = 0; $k < count($schedules); $k++) 
       {
@@ -140,7 +151,7 @@ class CreateSchedule extends Controller
             $interval += $schedules[$kk]->visit_interval;
           }
           
-          for($i = -10; $i < $interval + 10; $i++) {
+          for($i = -$average_travel_time; $i < $interval + $average_travel_time; $i++) {
             $ii = $specific_time + $i;
             if(!array_key_exists($ii, $box)){
               $isok = false;
@@ -202,7 +213,7 @@ class CreateSchedule extends Controller
             //   if($time >=$findedPos && $time < $findedPos + $schedule->visit_interval) $box[$time] = $schedule->id;
             //   else $box[$time] = 0;
             // }
-            for($i = -10; $i < $interval + 10; $i++) {
+            for($i = -$average_travel_time; $i < $interval + $average_travel_time; $i++) {
               $ii = $findedPos + $i;
               $jj = $findedPos + $i +  $delta*60;
               if(!array_key_exists($ii, $box)){
@@ -269,7 +280,7 @@ class CreateSchedule extends Controller
           //   if($time >=$findedPos && $time < $findedPos + $schedule->visit_interval) $box[$time] = $schedule->id;
           //   else $box[$time] = 0;
           // }
-          for($i = -10; $i < $interval + 10; $i++) {
+          for($i = -$average_travel_time; $i < $interval + $average_travel_time; $i++) {
             $ii = $findedPos + $i;
             if(!array_key_exists($ii, $box)){
               $isok = false;
