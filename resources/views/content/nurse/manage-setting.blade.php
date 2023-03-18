@@ -157,6 +157,7 @@
                 <table class="table">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Agency name</th>
                             <th>EployeeID</th>     
                             <th style="text-align: right;">Action</th>     
