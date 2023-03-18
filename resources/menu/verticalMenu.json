@@ -7,16 +7,16 @@
       "slug": "layouts"
     },
     {
-      "url": "/manager-setting",
-      "name": "Manage Setting",
-      "icon": "menu-icon tf-icons bx bx-cube-alt",
-      "slug": "layouts"
-    },    
-    {
       "url": "/create-schedule",
       "name": "Create Schedule for today",
       "icon": "menu-icon tf-icons bx bx-collection",
       "slug": "layouts"
-    }
+    },
+    {
+      "url": "/manager-setting",
+      "name": "Manage Setting",
+      "icon": "menu-icon tf-icons bx bx-cube-alt",
+      "slug": "layouts"
+    }    
   ]
 }

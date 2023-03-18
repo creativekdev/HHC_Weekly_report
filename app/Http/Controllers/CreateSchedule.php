@@ -81,12 +81,17 @@ class CreateSchedule extends Controller
       // Validation for required fields (and using some regex to validate our numeric value)
       // $patient = Patient::find('id');
       // $visitcode = VisitCode::all();
-      
+      $visitcodes = VisitCode::all();
+      $visitcode = "";
+      foreach($visitcodes as $v) {
+        $visitcode = $v->visit_code;
+        break;
+      }
       $patientForSchedule = [
         "patient_id"=>$request->id, 
         "date"=>date("Y-m-d"),
         "visit_times"=>1, 
-        "visit_code"=>"", 
+        "visit_code"=>$visitcode, 
         "visit_interval"=>15,
         "specific_time"=>"06:30", 
         "is_signed"=>"0",
