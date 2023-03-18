@@ -4,9 +4,30 @@
 
 @section('vendor-script')
 <script src="{{asset('assets/vendor/libs/masonry/masonry.js')}}"></script>
+
 @endsection
 
 @section('content')
+
+@foreach($patients as $patient)
+<iframe id="my_iframe{{$patient->id}}" style="display:none;"></iframe>
+@endforeach
+
+<script>
+function downloadAll(url) {
+    @foreach($patients as $patient)
+    document.getElementById('my_iframe{{$patient->id}}').src = url + "patient_id={{$patient->id}}" ;
+    @endforeach
+};
+function downloadAllWithWeek(url) {
+    @foreach($patients as $patient)
+    document.getElementById('my_iframe{{$patient->id}}').src = url + "week = " + document.getElementById("selected_week").value +"&patient_id={{$patient->id}}" ;
+    @endforeach
+
+}
+</script>
+
+
 <h4 class="fw-bold py-3 mb-4">Manager setting interface</h4>
 
 <!-- Examples -->
@@ -377,11 +398,11 @@
         <div class = "card">
             <h5 class="card-header">Export a weely report</h5>
             <div class="card-body demo-vertical-spacing demo-only-element">
-                <form action="{{route('getDoc')}}" method="GET">                
+                <form action="" method="GET">                
                     <div class="row">
                         <div class = "col-lg-10"><span>Last week(all Patients)</span></div>
                         <div class = "col-lg-2" style="margin-bottom: 0px; margin-top: auto;">
-                            <button type="submit" class="btn btn-primary">Export</button>
+                            <button  class="btn btn-primary" onclick="downloadAll('{{route('getDoc')}}?')">Export</button>
                         </div>                    
                     </div>
                 </form>
@@ -400,18 +421,18 @@
                         </div>                    
                     </div>
                 </form>
-                <form action="{{route('getDoc')}}" method="GET">                
+                <form action="" method="GET">                
                     <div class="row">
                         <div class = "col-lg-10 col-md-10">
                             <span>A specific week(all Patients)</span>
-                            <select name="week" class="form-select form-select-lg">
+                            <select name="week" id="selected_week" class="form-select form-select-lg">
                                 @foreach($weeks as $week)
                                 <option value="{{$week}}">{{$week}}(Saturday)</option>
                                 @endforeach
                             </select>                        
                         </div>
                         <div class = "col-lg-2 col-md-2" style="margin-bottom: 0px; margin-top: auto;">
-                            <button type="submit" class="btn btn-primary" >Export</button>
+                            <button class="btn btn-primary"  onclick="downloadAllWithWeek('{{route('getDoc')}}?')">Export</button>
                         </div>                    
                     </div>                
                 </form>
