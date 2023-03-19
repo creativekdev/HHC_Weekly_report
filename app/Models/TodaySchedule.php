@@ -18,6 +18,7 @@ class TodaySchedule extends Model
         'id',
         'date',
         'patient_id',
+        'root',
         'visit_times',
         'visit_code',
         'visit_interval',

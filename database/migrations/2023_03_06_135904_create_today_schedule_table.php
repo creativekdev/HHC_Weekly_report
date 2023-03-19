@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->date('date');
             $table->integer('patient_id');
+            $table->integer('root');
             $table->integer('visit_times')->nullable();
             $table->string('visit_code');
             $table->integer('visit_interval');

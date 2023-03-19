@@ -29,9 +29,16 @@
         function changeselect() {
             var isrepeat = document.getElementById("is_repeat");
             var selectpatient = document.getElementById("select_patient");
+            <?php
+                $last_patientid = 0;
+                foreach($todaySchedule as $sche){
+                    if($sche->root != -1) continue;
+                    $last_patientid = $sche->patient_id;
+                }
+            ?>
             if(isrepeat.checked) {
                 @if(count($todaySchedule)>0)
-                last_patientid = {{$todaySchedule[count($todaySchedule) - 1]->patient_id}};
+                last_patientid = {{$last_patientid}};
                 @endif
                 selectpatient.value = last_patientid;
                 // selectpatient.style.visibility = 'hidden';
@@ -131,7 +138,8 @@
                                 $prev = "";
                             ?>
     
-                            @foreach($todaySchedule as $schedule)                                 
+                            @foreach($todaySchedule as $schedule)
+                                @if($schedule->root == -1)
                                 <form action="{{route('create-schedule.updateSchedule')}}" method="POST">
                                     <input type="hidden" name="id" value="{{$schedule->id}}">
                                     <input type="hidden" name="date" value="{{$schedule->date}}">
@@ -233,7 +241,7 @@
                                         </div>
                                     </div>
                                 </div>            
-
+                                @endif
                             @endforeach
                         </tbody>
                     </table>

@@ -40,9 +40,12 @@ class TodaySigning extends Controller
       $todaySchedule = [];
       for($time = $start_time; $time <= $end_time; ){
         if($result_box[$time]>0) {
-          array_push($todaySchedule, $scheduleByID[$result_box[$time]]);
+          $sche = $scheduleByID[$result_box[$time]];
+          $sche["start_time"] = date('H:i', $time * 60);
+          array_push($todaySchedule, $sche);
           $cur = $result_box[$time];
           while($time <= $end_time && $result_box[$time] == $cur) $time++;
+          $sche["end_time"] = date('H:i', $time * 60);;
         }
         else{
           $time++;

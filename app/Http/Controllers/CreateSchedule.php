@@ -90,6 +90,7 @@ class CreateSchedule extends Controller
       $patientForSchedule = [
         "patient_id"=>$request->id, 
         "date"=>date("Y-m-d"),
+        "root"=>-1,
         "visit_times"=>1, 
         "visit_code"=>$visitcode, 
         "visit_interval"=>15,
@@ -124,8 +125,9 @@ class CreateSchedule extends Controller
       if(is_null($setting)){
         session()->flash("error", "Please apply setting for today.");
         return redirect()->back();
-      }      
+      }
       $schedules = TodaySchedule::where('date', date("Y-m-d"))->get();
+
       $start_time =  round(strtotime($setting->start_time) / 60);
       $end_time = round(strtotime($setting->end_time) / 60);
       $average_travel_time = $setting->average_travel_time;
@@ -144,8 +146,9 @@ class CreateSchedule extends Controller
       }
       //////////////////specific time placement///////////////////////////////
       $prev_patient_id = null;
-      for($k = 0; $k < count($schedules); $k++) {
+      for($k = 0; $k < count($schedules); $k++) {        
         if($vst[$schedules[$k]->id]) continue;
+        if($schedules[$k]->root != -1) continue;
         if($schedules[$k]->isspecific_time){
           $specific_time = round(strtotime($schedules[$k]->specific_time) / 60);
           $kk = $k;
@@ -180,7 +183,15 @@ class CreateSchedule extends Controller
       $prev_patient_id = null;
       for($k = 0; $k < count($schedules); $k++) {
         if($vst[$schedules[$k]->id]) continue;
+        if($schedules[$k]->root != -1) continue;
         if($schedules[$k]->visit_times > 1) {
+
+          $childs = [];
+          $child_cnt = 0;
+          for($kk = 0; $kk < count($schedules); $kk++) {
+            if($schedules[$kk]->root == $schedules[$k]->id) $childs[$child_cnt++] = $schedules[$kk];
+          }
+
           $delta = round(24 / $schedules[$k]->visit_times);
           $vst[$schedules[$k]->id] = true;
           
@@ -193,7 +204,7 @@ class CreateSchedule extends Controller
             // if(!array_key_exists($time - 8*60*60, $box)) continue;
 
             if($box[$time +  $delta*60] >= 0) continue;
-                        
+            
             $cnt = 0;
             while($cnt < $interval) {
               $ii = $time + $cnt;
@@ -236,7 +247,7 @@ class CreateSchedule extends Controller
                 if($box[$ii] >= 0) $isok = false;
                 if($box[$jj] >= 0) $isok = false;
                 $box[$ii] = $schedules[$k]->id;
-                $box[$jj] = $schedules[$k]->id;
+                $box[$jj] = $childs[0]->id;
               }
               else  $box[$ii] = 0;
             }
@@ -247,13 +258,17 @@ class CreateSchedule extends Controller
           }
         }
       }
-
       //placement
       for($k = 0; $k < count($schedules); $k++) {
 
         if($vst[$schedules[$k]->id]) continue;
+
+  
+        if($schedules[$k]->root != -1) continue;
+
         $interval = 0;
         for($kk = $k; $kk < count($schedules); $kk++) {
+          if($schedules[$kk]->root != -1) continue;
           if($schedules[$kk]->patient_id != $schedules[$k]->patient_id) break;
           $vst[$schedules[$kk]->id] = true;
           $interval += $schedules[$kk]->visit_interval;
@@ -300,7 +315,11 @@ class CreateSchedule extends Controller
                 $isok = false;
               }              
               $subinterval = 0;
-              for($selK = $k; $selK < count($schedules) && $subinterval + $schedules[$selK]->visit_interval  < $i; $selK++) $subinterval += $schedules[$selK]->visit_interval;
+              for($selK = $k; $selK < count($schedules) && $subinterval + $schedules[$selK]->visit_interval  < $i; $selK++)
+              {
+                if($schedules[$selK]->root != -1) continue;
+                $subinterval += $schedules[$selK]->visit_interval;
+              }
               $box[$ii] = $schedules[$selK]->id;
             }
             else  $box[$ii] = 0;
@@ -393,6 +412,7 @@ class CreateSchedule extends Controller
       ]);
       // echo json_encode($request->input());
       // die();
+      
       $stock = TodaySchedule::find($request->id);
       // Getting values from the blade template form
       $stock->date =  $request->get('date');
@@ -405,8 +425,31 @@ class CreateSchedule extends Controller
       $stock->isrepeated =  $request->get('isrepeated');
       $stock->isspecific_time =  $request->get('isspecific_time');
       if(is_null($stock->isspecific_time)) $stock->isspecific_time = "0";
-
       $stock->save();
+      $todaySchedule = TodaySchedule::where('date', date("Y-m-d"))->get();
+      $cnt = 0;
+      foreach($todaySchedule as $sched){
+        if($sched->root == $request->id) $cnt++;
+        if($cnt > 0 && $cnt > $stock->visit_times - 1) TodaySchedule::where('id', $sched->id)->delete();
+      }
+      for(;$cnt < $stock->visit_times - 1;$cnt++) {
+        $patientForSchedule = [
+          "patient_id"=>$request->get('patient_id'), 
+          "date"=> $request->get('date'),
+          "root"=>$request->id,
+          "visit_times"=>$request->get('visit_times'), 
+          "visit_code"=>$request->get('visit_code'), 
+          "visit_interval"=>$request->get('visit_interval'),
+          "specific_time"=>"06:30", 
+          "is_signed"=>"0",
+          "issaved"=>"0", 
+          "isrepeated"=>"0", 
+          "isspecific_time"=>false
+        ];
+        // echo json_encode($setting);
+        // return;
+        TodaySchedule::create($patientForSchedule);
+      }
 
       $res  = $this->alignment();
       $isok = $res['isok'];
@@ -445,7 +488,6 @@ class CreateSchedule extends Controller
           return redirect()->back();
         }
   
-
         return redirect()->back();
     }
 

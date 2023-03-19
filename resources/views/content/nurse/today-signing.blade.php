@@ -20,7 +20,7 @@ Today patient signing visit interface
         @foreach($todaySchedule as $visit) 
             <tr>
                 <td>
-                  <?php  if(array_key_exists($visit->patient_id, $patientName)) echo $patientName[$visit->patient_id] ?>
+                  <?php  if(array_key_exists($visit->patient_id, $patientName)) echo $patientName[$visit->patient_id] ?> ({{$visit->start_time}}~{{$visit->end_time}})
                 </td>
                 
                 @if($visit->is_signed)
