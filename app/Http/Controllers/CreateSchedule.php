@@ -320,6 +320,7 @@ class CreateSchedule extends Controller
                 if($schedules[$selK]->root != -1) continue;
                 $subinterval += $schedules[$selK]->visit_interval;
               }
+              while($selK < count($schedules) && $schedules[$selK]->root != -1) $selK++;
               $box[$ii] = $schedules[$selK]->id;
             }
             else  $box[$ii] = 0;
