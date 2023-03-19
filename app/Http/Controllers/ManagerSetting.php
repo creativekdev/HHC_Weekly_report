@@ -23,14 +23,11 @@ class ManagerSetting extends Controller
         $patient_array[$agency->id] = $agency;
       }
       $weeks = [];
+      $isvst = [];
       foreach($todayvisits as $visit) {
-        if(date('w', strtotime($visit->date)) == '6') {
-          array_push($weeks, date('m/d/Y',strtotime($visit->date)));
-        }
-      }
-
-      if(date('w') != '6') {
-        array_push($weeks, date("m/d/Y"));
+        if(isset($isvst[date('W', strtotime($visit->date))]) && $isvst[date('W', strtotime($visit->date))]) continue;
+        $isvst[date('W', strtotime($visit->date))] = true;
+        array_push($weeks, date('m/d/Y',strtotime($visit->date)));
       }
 
       return view('content.nurse.manage-setting', compact('patients', 'agencis', 'visitcodes', 'weeks', 'patient_array'));
@@ -52,8 +49,6 @@ class ManagerSetting extends Controller
       // echo json_encode($request->get('patient_id'));
       $patient_id = $request->get('patient_id');
       $week = $request->get('week');
-      // echo json_encode($week);
-      // die();
       if(!is_null($week)){
         $sunday = date('Y-m-d',strtotime($week) + ( 0 - date('w', strtotime($week)))*24*3600);
         $saturday = date('Y-m-d',strtotime($week) + ( 6 - date('w', strtotime($week)))*24*3600);
