@@ -50,12 +50,12 @@ class ManagerSetting extends Controller
       $patient_id = $request->get('patient_id');
       $week = $request->get('week');
       if(!is_null($week)){
-        $sunday = date('Y-m-d',strtotime($week) + ( 0 - date('w', strtotime($week)))*24*3600);
-        $saturday = date('Y-m-d',strtotime($week) + ( 6 - date('w', strtotime($week)))*24*3600);
+        $sunday = date('Y-m-d',strtotime('last Sunday', strtotime($week)));
+        $saturday = date('Y-m-d',strtotime('saturday this week', strtotime($week)));
       }
       else{
-        $sunday = date('Y-m-d', time() +  0 - date('w')*24*3600);
-        $saturday = date('Y-m-d',time() + ( 6 - date('w'))*24*3600);
+        $sunday = date('Y-m-d',strtotime('last Sunday'));
+        $saturday = date('Y-m-d',strtotime('saturday this week'));
       }
       
       $todayvisits = TodayVisit::all();
