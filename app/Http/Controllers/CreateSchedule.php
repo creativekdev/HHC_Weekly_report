@@ -30,8 +30,21 @@ class CreateSchedule extends Controller
       }
       // echo json_encode($setting);
       // die();
-      
-      return view('content.nurse.create-schedule',  compact('patients', 'agencis', 'visitcodes', 'setting','todaySchedule','patientName'));
+      $havetoSave =  false;
+      if(count($todaySchedule) == 0) {
+        $lastDate = TodaySchedule::max('date');
+        $lastSchedule = TodaySchedule::where('date', $lastDate)->get();
+        $issaved = true;
+        foreach($lastSchedule as $schedule) {
+          if(!$schedule->issaved) $issaved = false;
+        }
+        if(!$issaved){
+          session()->flash("error", "Please save previouse schedule.(".$lastDate.")");
+          $todaySchedule = $lastSchedule;
+          $havetoSave = true;
+        }
+      }
+      return view('content.nurse.create-schedule',  compact('patients', 'agencis', 'visitcodes', 'setting','todaySchedule','patientName','havetoSave'));
     }
 
     public function applySetting(Request $request) {
@@ -55,7 +68,25 @@ class CreateSchedule extends Controller
         Setting::create($param);
       }
       
-      $res  = $this->alignment();
+      $todaySchedule = TodaySchedule::where('date', date("Y-m-d"))->get();
+
+      $date = date("Y-m-d");
+      $havetoSave =  false;
+      if(count($todaySchedule) == 0) {
+        $lastDate = TodaySchedule::max('date');
+        $lastSchedule = TodaySchedule::where('date', $lastDate)->get();
+        $issaved = true;
+        foreach($lastSchedule as $schedule) {
+          if(!$schedule->issaved) $issaved = false;
+        }
+        if(!$issaved){
+          $havetoSave = true;
+          $date = $lastDate;
+        }
+      }
+
+
+      $res  = $this->alignment($date);
       $isok = $res['isok'];
       $result_box = $res['result_box'];
 
@@ -73,6 +104,21 @@ class CreateSchedule extends Controller
     public function addPatient(Request $request) {
       // echo json_encode($request->id);
 
+      $todaySchedule = TodaySchedule::where('date', date("Y-m-d"))->get();
+      $date = date("Y-m-d");
+      $havetoSave =  false;
+      if(count($todaySchedule) == 0) {
+        $lastDate = TodaySchedule::max('date');
+        $lastSchedule = TodaySchedule::where('date', $lastDate)->get();
+        $issaved = true;
+        foreach($lastSchedule as $schedule) {
+          if(!$schedule->issaved) $issaved = false;
+        }
+        if(!$issaved){
+          $havetoSave = true;
+          $date = $lastDate;
+        }
+      }
       // die();
       $request->validate([
         'id'=>'required'
@@ -89,7 +135,7 @@ class CreateSchedule extends Controller
       }
       $patientForSchedule = [
         "patient_id"=>$request->id, 
-        "date"=>date("Y-m-d"),
+        "date"=>$date,
         "root"=>-1,
         "visit_times"=>1, 
         "visit_code"=>$visitcode, 
@@ -104,7 +150,7 @@ class CreateSchedule extends Controller
       // return;
       TodaySchedule::create($patientForSchedule);
 
-      $res  = $this->alignment();
+      $res  = $this->alignment($date);
       $isok = $res['isok'];
       $result_box = $res['result_box'];
 
@@ -120,13 +166,13 @@ class CreateSchedule extends Controller
       // return redirect()->back();
     }
 
-    public function alignment() {
+    public function alignment($date) {
       $setting = Setting::where('date', date("1994-4-12"))->first();
       if(is_null($setting)){
         session()->flash("error", "Please apply setting for today.");
         return redirect()->back();
       }
-      $schedules = TodaySchedule::where('date', date("Y-m-d"))->get();
+      $schedules = TodaySchedule::where('date', $date)->get();
 
       $start_time =  round(strtotime($setting->start_time) / 60);
       $end_time = round(strtotime($setting->end_time) / 60);
@@ -341,8 +387,24 @@ class CreateSchedule extends Controller
     }
 
     public function saveSchedule(Request $request) {
-
-      $res  = $this->alignment();
+      $date = date("Y-m-d");
+      $schedules = TodaySchedule::where('date', date("Y-m-d"))->get();
+      $havetoSave =  false;
+      if(count($schedules) == 0) {
+        $lastDate = TodaySchedule::max('date');
+        $lastSchedule = TodaySchedule::where('date', $lastDate)->get();
+        $issaved = true;
+        foreach($lastSchedule as $schedule) {
+          if(!$schedule->issaved) $issaved = false;
+        }
+        if(!$issaved){
+          $schedules = $lastSchedule;
+          $havetoSave = true;
+          $date = $lastDate;
+        }
+      }
+      
+      $res  = $this->alignment($date);
       $isok = $res['isok'];
       $result_box = $res['result_box'];
       // $box = [];
@@ -351,7 +413,7 @@ class CreateSchedule extends Controller
 
       $start_time =  round(strtotime($setting->start_time) / 60);
       $end_time = round(strtotime($setting->end_time) / 60);
-      $schedules = TodaySchedule::where('date', date("Y-m-d"))->get();
+      // $schedules = TodaySchedule::where('date', $date)->get();
       $scheduleByID = [];
       for($k = 0; $k < count($schedules); $k++) {
         $scheduleByID[$schedules[$k]->id] = $schedules[$k];
@@ -360,8 +422,7 @@ class CreateSchedule extends Controller
 
 
       if($isok){
-        $today = date("Y-m-d");
-        $setting = TodaySchedule::where('date', $today)->update(['issaved'=>"1"]);
+        $setting = TodaySchedule::where('date', $date)->update(['issaved'=>"1"]);
 
         // $visits = TodayVisit::where('date', $today)->get();
 
@@ -371,7 +432,7 @@ class CreateSchedule extends Controller
         //     unlink($visit->sign_url);
         //   }
         // }
-        TodayVisit::where('date', $today)->delete();
+        TodayVisit::where('date', $date)->delete();
 
 
         $isfirst = true;      
@@ -382,7 +443,7 @@ class CreateSchedule extends Controller
             // die();
 
             TodayVisit::create([
-              'date'=>$today, 
+              'date'=>$date, 
               'patient_id'=>$schedule->patient_id, 
               'schedule_id'=>$schedule->id, 
               'visit_code'=>$schedule->visit_code,
@@ -427,7 +488,26 @@ class CreateSchedule extends Controller
       $stock->isspecific_time =  $request->get('isspecific_time');
       if(is_null($stock->isspecific_time)) $stock->isspecific_time = "0";
       $stock->save();
+
+
+
       $todaySchedule = TodaySchedule::where('date', date("Y-m-d"))->get();
+      $date = date("Y-m-d");
+      $havetoSave =  false;
+      if(count($todaySchedule) == 0) {
+        $lastDate = TodaySchedule::max('date');
+        $lastSchedule = TodaySchedule::where('date', $lastDate)->get();
+        $issaved = true;
+        foreach($lastSchedule as $schedule) {
+          if(!$schedule->issaved) $issaved = false;
+        }
+        if(!$issaved){
+          $todaySchedule = $lastSchedule;
+          $havetoSave = true;
+          $date = $lastDate;
+        }
+      }
+
       $cnt = 0;
       foreach($todaySchedule as $sched){
         if($sched->root == $request->id) $cnt++;
@@ -452,7 +532,7 @@ class CreateSchedule extends Controller
         TodaySchedule::create($patientForSchedule);
       }
 
-      $res  = $this->alignment();
+      $res  = $this->alignment($date);
       $isok = $res['isok'];
       $result_box = $res['result_box'];
 
@@ -475,8 +555,23 @@ class CreateSchedule extends Controller
         $patient = TodaySchedule::find($request->id);
         $patient->delete();
         // session()->flash("success", "deleted successfully.");
+        $todaySchedule = TodaySchedule::where('date', date("Y-m-d"))->get();
+        $date = date("Y-m-d");
+        $havetoSave =  false;
+        if(count($todaySchedule) == 0) {
+          $lastDate = TodaySchedule::max('date');
+          $lastSchedule = TodaySchedule::where('date', $lastDate)->get();
+          $issaved = true;
+          foreach($lastSchedule as $schedule) {
+            if(!$schedule->issaved) $issaved = false;
+          }
+          if(!$issaved){
+            $havetoSave = true;
+            $date = $lastDate;
+          }
+        }
 
-        $res  = $this->alignment();
+        $res  = $this->alignment($date);
         $isok = $res['isok'];
         $result_box = $res['result_box'];
   

@@ -19,11 +19,28 @@ class TodaySigning extends Controller
       $patients = Patient::all();
       $agencis = Agency::all();
       $visitcodes = VisitCode::all();
-      // $todaySchedule = TodaySchedule::where('date', date("Y-m-d"))->get();
-      $todayVisits = TodayVisit::where('date', date("Y-m-d"))->get();
+      $org_schedules = TodaySchedule::where('date', date("Y-m-d"))->get();
+      $date = date("Y-m-d");
+
+      $havetoSave =  false;
+      if(count($org_schedules) == 0) {
+        $lastDate = TodaySchedule::max('date');
+        $lastSchedule = TodaySchedule::where('date', $lastDate)->get();
+        $issaved = true;
+        foreach($lastSchedule as $schedule) {
+          if(!$schedule->issaved) $issaved = false;
+        }
+        if(!$issaved){
+          session()->flash("error", "Please save previouse schedule.(".$lastDate.")");
+          $org_schedules = $lastSchedule;
+          $havetoSave = true;
+          $date = $lastDate;
+        }
+      }
+
       $patientName =  [];
       
-      $res  = (new CreateSchedule)->alignment();
+      $res  = (new CreateSchedule)->alignment($date);
       $isok = $res['isok'];
       $result_box = $res['result_box'];
       // $box = [];
@@ -32,7 +49,7 @@ class TodaySigning extends Controller
 
       $start_time =  round(strtotime($setting->start_time) / 60);
       $end_time = round(strtotime($setting->end_time) / 60);
-      $org_schedules = TodaySchedule::where('date', date("Y-m-d"))->get();
+      // $org_schedules = TodaySchedule::where('date', date("Y-m-d"))->get();
       $scheduleByID = [];
       for($k = 0; $k < count($org_schedules); $k++) {
         $scheduleByID[$org_schedules[$k]->id] = $org_schedules[$k];
@@ -55,8 +72,7 @@ class TodaySigning extends Controller
       foreach($patients as $patient) {
         $patientName[$patient->id] = $patient->name;
       }
-
-      $setting = Setting::where('date', date("Y-m-d"))->first();
-      return view('content.nurse.today-signing', compact('patients', 'agencis', 'visitcodes', 'setting','todaySchedule','todayVisits', 'patientName'));
+      
+      return view('content.nurse.today-signing', compact('date','patients', 'agencis', 'visitcodes', 'setting','todaySchedule', 'patientName'));
     }
 }
