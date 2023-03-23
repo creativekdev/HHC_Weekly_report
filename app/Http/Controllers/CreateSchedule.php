@@ -432,33 +432,38 @@ class CreateSchedule extends Controller
         //     unlink($visit->sign_url);
         //   }
         // }
-        TodayVisit::where('date', $date)->delete();
 
-
-        $isfirst = true;      
+        $todaySchedule = [];
         for($time = $start_time; $time <= $end_time; ){
           if($result_box[$time]>0) {
-            $schedule = $scheduleByID[$result_box[$time]];
-            // echo json_encode($schedule->patient_id);
-            // die();
-
-            TodayVisit::create([
-              'date'=>$date, 
-              'patient_id'=>$schedule->patient_id, 
-              'schedule_id'=>$schedule->id, 
-              'visit_code'=>$schedule->visit_code,
-              'visit_interval'=>$schedule->visit_interval,               
-              'is_signed'=>$schedule->is_signed,
-              'sign_time'=>$schedule->sign_time,
-              'sign_url'=>$schedule->sign_url
-            ]);
+            $sche = $scheduleByID[$result_box[$time]];
+            $sche["start_time"] = date('H:i', $time * 60);
+            array_push($todaySchedule, $sche);
             $cur = $result_box[$time];
             while($time <= $end_time && $result_box[$time] == $cur) $time++;
+            $sche["end_time"] = date('H:i', $time * 60);;
           }
           else{
             $time++;
           }
         }
+
+        TodayVisit::where('date', $date)->delete();
+
+        foreach($todaySchedule as $sche) {
+          TodayVisit::create([
+            'date'=>$date, 
+            'patient_id'=>$sche->patient_id, 
+            'schedule_id'=>$sche->id, 
+            'visit_code'=>$sche->visit_code,
+            'visit_interval'=>$sche->visit_interval,               
+            'is_signed'=>$sche->is_signed,
+            'sign_time'=>$sche['end_time'],
+            'sign_url'=>$sche->sign_url
+          ]);
+
+        }
+
         $res  = $this->alignment(date("Y-m-d"));
         $isok = $res['isok'];
         $result_box = $res['result_box'];
