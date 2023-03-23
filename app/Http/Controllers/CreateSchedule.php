@@ -388,7 +388,8 @@ class CreateSchedule extends Controller
 
     public function saveSchedule(Request $request) {
       $date = date("Y-m-d");
-      $schedules = TodaySchedule::where('date', date("Y-m-d"))->get();
+      $schedules = TodaySchedule::where('date', date("Y-m-d"))->get();      
+
       $havetoSave =  false;
       if(count($schedules) == 0) {
         $lastDate = TodaySchedule::max('date');
@@ -404,6 +405,13 @@ class CreateSchedule extends Controller
         }
       }
       
+      foreach($schedules as $sche){
+        if(!$sche->is_signed) {
+          session()->flash("error", "Please sign missed visits.");  
+          return redirect()->back();
+        }
+      }
+
       $res  = $this->alignment($date);
       $isok = $res['isok'];
       $result_box = $res['result_box'];
