@@ -459,7 +459,9 @@ class CreateSchedule extends Controller
             $time++;
           }
         }
-
+        $res  = $this->alignment(date("Y-m-d"));
+        $isok = $res['isok'];
+        $result_box = $res['result_box'];
         session()->flash("success", "Saved Success fully");
         return redirect()->back()->with('box', $result_box );
       }
