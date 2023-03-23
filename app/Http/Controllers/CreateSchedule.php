@@ -30,20 +30,30 @@ class CreateSchedule extends Controller
       }
       // echo json_encode($setting);
       // die();
+
+
       $havetoSave =  false;
       if(count($todaySchedule) == 0) {
         $lastDate = TodaySchedule::max('date');
         $lastSchedule = TodaySchedule::where('date', $lastDate)->get();
         $issaved = true;
+        $issigned = true;
         foreach($lastSchedule as $schedule) {
           if(!$schedule->issaved) $issaved = false;
+          if(!$schedule->is_signed) $issigned = false;
         }
-        if(!$issaved){
+        if(!$issigned){
+          session()->flash("error", "Please sign missed visits.");  
+          $todaySchedule = $lastSchedule;
+          $havetoSave = true;
+        }
+        else if(!$issaved){
           session()->flash("error", "Please save previouse schedule.(".$lastDate.")");
           $todaySchedule = $lastSchedule;
           $havetoSave = true;
         }
       }
+
       return view('content.nurse.create-schedule',  compact('patients', 'agencis', 'visitcodes', 'setting','todaySchedule','patientName','havetoSave'));
     }
 

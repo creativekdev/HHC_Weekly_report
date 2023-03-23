@@ -67,7 +67,7 @@ class TodaySigning extends Controller
         else{
           $time++;
         }
-    }
+      }
 
       foreach($patients as $patient) {
         $patientName[$patient->id] = $patient->name;
