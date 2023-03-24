@@ -427,7 +427,7 @@ function downloadAllWithWeek(url) {
                             <span>A specific week(all Patients)</span>
                             <select name="week" id="selected_week" class="form-select form-select-lg">
                                 @foreach($weeks as $week)
-                                <option value="{{$week}}">{{date('Y-m-d',strtotime('last Sunday', strtotime($week)))}}~{{date('Y-m-d',strtotime('saturday this week', strtotime($week)))}}</option>
+                                <option value="{{$week}}">{{date('m/d/Y',strtotime('last Sunday', strtotime($week)))}}~{{date('m/d/Y',strtotime('saturday this week', strtotime($week)))}}</option>
                                 @endforeach
                             </select>                        
                         </div>
@@ -450,7 +450,7 @@ function downloadAllWithWeek(url) {
                             <span>Specific week</span>
                             <select name="week" class="form-select form-select-lg">
                                 @foreach($weeks as $week)
-                                <option value="{{$week}}">{{date('Y-m-d',strtotime('last Sunday', strtotime($week)))}}~{{date('Y-m-d',strtotime('saturday this week', strtotime($week)))}}</option>
+                                <option value="{{$week}}">{{date('m/d/Y',strtotime('last Sunday', strtotime($week)))}}~{{date('m/d/Y',strtotime('saturday this week', strtotime($week)))}}</option>
                                 @endforeach
                             </select>                        
                         </div>
