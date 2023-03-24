@@ -48,7 +48,7 @@ class CreateSchedule extends Controller
           $havetoSave = true;
         }
         else if(!$issaved){
-          session()->flash("error", "Please save previouse schedule.(".$lastDate.")");
+          session()->flash("error", "Please save previouse schedule.(".date("m/d/Y", strtotime($lastDate)).")");
           $todaySchedule = $lastSchedule;
           $havetoSave = true;
         }
