@@ -429,12 +429,12 @@ function downloadAllWithWeek(url) {
                                 @foreach($weeks as $week)
                                 <option value="{{$week}}">{{date('m/d/Y',strtotime('last Sunday', strtotime($week)))}}~{{date('m/d/Y',strtotime('saturday this week', strtotime($week)))}}</option>
                                 @endforeach
-                            </select>                        
+                            </select>
                         </div>
                         <div class = "col-lg-2 col-md-2" style="margin-bottom: 0px; margin-top: auto;">
                             <button class="btn btn-primary"  onclick="downloadAllWithWeek('{{route('getDoc')}}?')">Export</button>
-                        </div>                    
-                    </div>                
+                        </div>
+                    </div>
                 </form>
                 <form action="{{route('getDoc')}}" method="GET">                
                     <div class="row">
