@@ -784,8 +784,15 @@ div.WordSection1
 <h2 align=center style='text-align:center'><span style='mso-fareast-font-family:
 "Times New Roman";mso-fareast-language:ZH-CN;mso-no-proof:yes'><img width=50
 height=50 id="_x0000_i1025"
-src="{{asset('images/'.$agency->avatar)}}"></span><span
-style='font-size:14.0pt;mso-fareast-font-family:"Times New Roman"'>{{$agency->agency_name}}</span></h2>
+@if(isset($agency))
+src="{{asset('images/'.$agency->avatar)}}"
+@endif
+></span><span
+style='font-size:14.0pt;mso-fareast-font-family:"Times New Roman"'>
+  @if(isset($agency))
+  {{$agency->agency_name}}
+  @endif
+</span></h2>
 
 <h2 align=center style='text-align:center'><span style='font-size:11.0pt;
 mso-fareast-font-family:"Times New Roman"'>WEEKLY VISIT/TIME RECORD<o:p></o:p></span></h2>

@@ -63,7 +63,11 @@ function downloadAllWithWeek(url) {
                                 <td>{{$patient->name}}</td>
                                 <td>{{$patient->address}}</td>
                                 <td>{{$patient->clinical_record}}</td>
-                                <td>{{$patient_array[$patient->agency_id]->agency_name}}</td>
+                                <td>
+                                    @if(isset($patient_array[$patient->agency_id]))
+                                        {{$patient_array[$patient->agency_id]->agency_name}}
+                                    @endif
+                                </td>
                                 <td style="text-align: right;">
                                     <div class="dropdown">
                                         <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="false"><i class="bx bx-dots-vertical-rounded"></i></button>
